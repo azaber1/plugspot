@@ -10,12 +10,20 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // CORS configuration - Allow all origins for now (you can restrict later)
-app.use(cors({
-  origin: true, // Allow all origins for now
-  credentials: true,
+const corsOptions = {
+  origin: '*', // Allow all origins
+  credentials: false, // Set to false when using origin: '*'
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+};
+
+app.use(cors(corsOptions));
+
+// Handle preflight requests explicitly
+app.options('*', cors(corsOptions));
+
 app.use(express.json());
 
 // Initialize Resend
