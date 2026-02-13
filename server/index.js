@@ -13,16 +13,23 @@ const PORT = process.env.PORT || 3001;
 const corsOptions = {
   origin: '*', // Allow all origins
   credentials: false, // Set to false when using origin: '*'
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Content-Type'],
   preflightContinue: false,
   optionsSuccessStatus: 204
 };
 
+// Apply CORS to all routes BEFORE other middleware
 app.use(cors(corsOptions));
 
-// Handle preflight requests explicitly
-app.options('*', cors(corsOptions));
+// Handle preflight requests explicitly for all routes
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  res.sendStatus(204);
+});
 
 app.use(express.json());
 
@@ -170,8 +177,13 @@ app.get('/api/stripe-connect/account/:hostId', async (req, res) => {
     
     // In a real app, you'd look up the Stripe account from your database
     // For now, return null (account not connected)
-    // This endpoint exists to prevent 404 errors
-    res.status(404).json({ error: 'Account not found' });
+    // Return 200 with null to indicate account not found (not an error)
+    res.json({ 
+      accountId: null,
+      email: null,
+      isActive: false,
+      chargesEnabled: false
+    });
   } catch (error) {
     console.error('Error getting Stripe Connect account:', error);
     res.status(500).json({ error: 'Failed to get Stripe Connect account' });
