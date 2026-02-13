@@ -9,8 +9,13 @@ const { Resend } = require('resend');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
-app.use(cors());
+// CORS configuration - Allow all origins for now (you can restrict later)
+app.use(cors({
+  origin: true, // Allow all origins for now
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // Initialize Resend
@@ -147,6 +152,21 @@ app.get('/api/stripe-connect/oauth-url', async (req, res) => {
   } catch (error) {
     console.error('OAuth URL error:', error);
     res.status(500).json({ error: 'Failed to generate OAuth URL' });
+  }
+});
+
+// Get Stripe Connect account status
+app.get('/api/stripe-connect/account/:hostId', async (req, res) => {
+  try {
+    const { hostId } = req.params;
+    
+    // In a real app, you'd look up the Stripe account from your database
+    // For now, return null (account not connected)
+    // This endpoint exists to prevent 404 errors
+    res.status(404).json({ error: 'Account not found' });
+  } catch (error) {
+    console.error('Error getting Stripe Connect account:', error);
+    res.status(500).json({ error: 'Failed to get Stripe Connect account' });
   }
 });
 

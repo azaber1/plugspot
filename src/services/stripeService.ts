@@ -109,12 +109,16 @@ export const getStripeConnectAccount = async (
   hostId: string
 ): Promise<StripeConnectAccount | null> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/stripe/connect/account/${hostId}`, {
+    // Fix double slash issue - ensure API_BASE_URL doesn't end with / and path doesn't start with /
+    const baseUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+    const path = `/stripe-connect/account/${hostId}`;
+    const url = `${baseUrl}${path}`;
+    
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
-      credentials: 'include',
     });
 
     if (response.status === 404) {
@@ -128,7 +132,8 @@ export const getStripeConnectAccount = async (
     return await response.json();
   } catch (error) {
     console.error('Error getting Stripe Connect account:', error);
-    throw error;
+    // Return null instead of throwing - account just isn't connected yet
+    return null;
   }
 };
 

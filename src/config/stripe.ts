@@ -17,8 +17,15 @@ export const getStripe = (): Promise<Stripe | null> => {
   return stripePromise;
 };
 
-// API base URL
-export const API_BASE_URL = (import.meta.env as any).VITE_API_URL || 'http://localhost:3001/api';
+// API base URL - ensure it doesn't end with /api/api
+let apiUrl = (import.meta.env as any).VITE_API_URL || 'http://localhost:3001/api';
+// Remove trailing slash if present
+apiUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+// Ensure it ends with /api
+if (!apiUrl.endsWith('/api')) {
+  apiUrl = apiUrl.endsWith('/') ? `${apiUrl}api` : `${apiUrl}/api`;
+}
+export const API_BASE_URL = apiUrl;
 
 // Stripe Connect Client ID
 export const STRIPE_CONNECT_CLIENT_ID = (import.meta.env as any).VITE_STRIPE_CONNECT_CLIENT_ID || '';
