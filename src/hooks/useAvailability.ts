@@ -43,7 +43,7 @@ export const useAvailability = () => {
     });
 
     setAvailableChargers(chargersWithAvailability);
-  }, [userChargers, bookings]);
+  }, [userChargers, bookings, chargers]);
 
   // Update availability every 30 seconds for real-time feel
   useEffect(() => {
