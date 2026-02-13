@@ -3,8 +3,9 @@ import { loadStripe, Stripe } from '@stripe/stripe-js';
 // Get Stripe publishable key from environment variables
 const stripePublishableKey = (import.meta.env as any).VITE_STRIPE_PUBLISHABLE_KEY || '';
 
-if (!stripePublishableKey && (import.meta.env as any).VITE_ENV !== 'development') {
-  console.error('Missing VITE_STRIPE_PUBLISHABLE_KEY environment variable');
+// Only warn in production if key is actually missing
+if (!stripePublishableKey && (import.meta.env as any).VITE_ENV === 'production') {
+  console.warn('Missing VITE_STRIPE_PUBLISHABLE_KEY - Stripe features will not work');
 }
 
 // Initialize Stripe

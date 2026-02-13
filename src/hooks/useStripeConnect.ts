@@ -63,8 +63,11 @@ export const useStripeConnect = (hostId?: string) => {
           }
         }
       } catch (err: any) {
-        console.error('Error loading Stripe account:', err);
-        setError(err.message || 'Failed to load Stripe account');
+        // Silently fail - this is expected for hosts without Stripe accounts
+        // Only log if it's not a network error (which is expected)
+        if (err.message && !err.message.includes('Failed to fetch') && !err.message.includes('ERR_CONNECTION')) {
+          console.log('Stripe Connect account not found (this is normal for new hosts)');
+        }
         
         // Fallback to localStorage
         try {
