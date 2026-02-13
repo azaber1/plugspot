@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useChargers } from '../hooks/useChargers';
 import { useToast } from '../components/ToastContext';
 import { ConnectorType } from '../types';
+import ImageUpload from '../components/ImageUpload';
 
 const AMENITY_OPTIONS = [
   'WiFi',
@@ -34,6 +35,7 @@ const ListChargerPage = () => {
     accessFee: 2.0,
     description: '',
     amenities: [] as string[],
+    photos: [] as string[],
   });
 
   const [loading, setLoading] = useState(false);
@@ -70,8 +72,9 @@ const ListChargerPage = () => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Generate coordinates (in real app, use geocoding API)
-      const baseLat = 37.8044;
-      const baseLng = -122.2712;
+      // DMV area: DC, Maryland, Virginia
+      const baseLat = 38.9072;
+      const baseLng = -77.0369;
       const lat = baseLat + (Math.random() - 0.5) * 0.1;
       const lng = baseLng + (Math.random() - 0.5) * 0.1;
 
@@ -97,6 +100,7 @@ const ListChargerPage = () => {
       amenities: formData.amenities,
       available: true,
       description: formData.description,
+      photos: formData.photos,
       reviews: [],
     };
 
@@ -261,6 +265,21 @@ const ListChargerPage = () => {
                     </label>
                   ))}
                 </div>
+              </div>
+
+              {/* Photos */}
+              <div>
+                <h2 className="text-xl font-heading font-semibold mb-4 text-gray-100">
+                  Photos
+                </h2>
+                <p className="text-gray-400 text-sm mb-4">
+                  Add photos of your charger and parking area. More photos = more bookings!
+                </p>
+                <ImageUpload
+                  images={formData.photos}
+                  onImagesChange={(photos) => setFormData({ ...formData, photos })}
+                  maxImages={5}
+                />
               </div>
 
               {/* Description */}

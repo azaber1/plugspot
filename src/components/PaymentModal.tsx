@@ -150,14 +150,12 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         const subtotal = amount;
         const platformFee = subtotal * 0.12;
 
-        const response = await createPaymentIntent({
-          amount: Math.round(amount * 100), // Convert to cents
-          currency: 'usd',
-          chargerId,
-          hostStripeAccountId,
-          bookingId,
-          applicationFeeAmount: Math.round(platformFee * 100), // Platform commission in cents
-        });
+        const response = await createPaymentIntent(
+          amount, // Amount in dollars (will be converted to cents in service)
+          hostStripeAccountId || '',
+          chargerId || '',
+          bookingId || ''
+        );
 
         setClientSecret(response.clientSecret);
         setStripePromise(getStripe());

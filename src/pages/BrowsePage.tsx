@@ -8,7 +8,8 @@ import { useAvailability } from '../hooks/useAvailability';
 import { formatNextAvailableTime, formatDateTime, calculateDistance } from '../utils/scheduling';
 
 // User's location (in real app, get from geolocation or user profile)
-const USER_LOCATION = { lat: 37.8044, lng: -122.2712 };
+// DMV area: DC, Maryland, Virginia
+const USER_LOCATION = { lat: 38.9072, lng: -77.0369 };
 
 const fadeUp = {
   initial: { opacity: 0, y: 30 },

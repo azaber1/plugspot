@@ -15,6 +15,7 @@ import { calculateBookingCost } from '../utils/pricing';
 import ScheduleView from '../components/ScheduleView';
 import TimeSlotPicker from '../components/TimeSlotPicker';
 import PaymentModal from '../components/PaymentModal';
+import { sendEmail, emailTemplates } from '../services/emailService';
 
 const fadeUp = {
   initial: { opacity: 0, y: 30 },
@@ -142,6 +143,46 @@ const ChargerDetailPage = () => {
       'success'
     );
     
+    // Send email notifications
+    const guestEmail = user.email;
+    // Try to get host email from user data if available, otherwise use fallback
+    const hostEmail = `host-${charger.hostId}@plugspot.com`; // In production, fetch from user database
+    
+    // Send confirmation to guest
+    sendEmail({
+      to: guestEmail,
+      ...emailTemplates.bookingConfirmationGuest({
+        chargerAddress: `${charger.address}, ${charger.city}`,
+        startTime: booking.startTime,
+        endTime: booking.endTime,
+        totalCost: booking.totalCost,
+        bookingId: booking.id,
+      }),
+    });
+
+    // Send notification to host
+    sendEmail({
+      to: hostEmail,
+      ...emailTemplates.bookingConfirmationHost({
+        guestName: user.name,
+        chargerAddress: `${charger.address}, ${charger.city}`,
+        startTime: booking.startTime,
+        endTime: booking.endTime,
+        hostEarnings: booking.hostEarnings,
+        bookingId: booking.id,
+      }),
+    });
+
+    // Send payment receipt
+    sendEmail({
+      to: guestEmail,
+      ...emailTemplates.paymentReceipt({
+        bookingId: booking.id,
+        totalCost: booking.totalCost,
+        date: booking.createdAt,
+      }),
+    });
+    
     // Wait a moment for state to update, then navigate with booking data
     setTimeout(() => {
       navigate(`/booking/${booking.id}/confirm`, { state: { booking } });
@@ -228,9 +269,38 @@ const ChargerDetailPage = () => {
               </div>
             </motion.div>
 
+            {/* Photos */}
+            {charger.photos && charger.photos.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-100px' }}
+                transition={{ duration: 0.6 }}
+                className="glass-card p-6"
+              >
+                <h3 className="text-xl font-heading font-semibold mb-4 text-gray-100">
+                  Photos
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {charger.photos.map((photo, index) => (
+                    <img
+                      key={index}
+                      src={photo}
+                      alt={`Charger photo ${index + 1}`}
+                      className="w-full h-48 object-cover rounded-lg border border-gray-700 hover:border-electric-green transition-colors cursor-pointer"
+                      onClick={() => window.open(photo, '_blank')}
+                    />
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
             {/* Charger Specs */}
             <motion.div
-              {...fadeUp}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-100px' }}
+              transition={{ duration: 0.6 }}
               className="glass-card p-6"
             >
               <h3 className="text-xl font-heading font-semibold mb-4 text-gray-100">

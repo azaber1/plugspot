@@ -25,6 +25,7 @@ export interface Charger {
   available: boolean;
   nextSlot?: string;
   description: string;
+  photos?: string[]; // Array of image URLs
   reviews?: Review[];
 }
 

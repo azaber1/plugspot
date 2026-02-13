@@ -93,7 +93,7 @@ export const useStripeConnect = (hostId?: string) => {
       setError(null);
 
       // Use OAuth flow for production
-      const oauthUrl = getStripeConnectOAuthUrl(hostId, returnUrl);
+      const oauthUrl = await getStripeConnectOAuthUrl(hostId, returnUrl);
       window.location.href = oauthUrl;
     } catch (err: any) {
       setError(err.message || 'Failed to connect Stripe account');

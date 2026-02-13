@@ -31,27 +31,42 @@ export interface CreateStripeConnectAccountResponse {
  * Create a payment intent with Stripe Connect for split payments
  */
 export const createPaymentIntent = async (
-  request: CreatePaymentIntentRequest
-): Promise<CreatePaymentIntentResponse> => {
+  amount: number,
+  hostStripeAccountId: string,
+  chargerId: string,
+  bookingId: string
+): Promise<{ clientSecret: string; paymentIntentId: string }> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/stripe/create-payment-intent`, {
+    const response = await fetch(`${API_BASE_URL}/payments/create-intent`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      credentials: 'include',
-      body: JSON.stringify(request),
+      body: JSON.stringify({
+        amount,
+        hostStripeAccountId,
+        chargerId,
+        bookingId,
+      }),
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Failed to create payment intent' }));
-      throw new Error(error.message || 'Failed to create payment intent');
+      const error = await response.json().catch(() => ({ error: 'Failed to create payment intent' }));
+      throw new Error(error.error || 'Failed to create payment intent');
     }
 
     return await response.json();
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating payment intent:', error);
-    throw error;
+    // Fallback for development if backend is not available
+    if (import.meta.env.DEV && error.message.includes('fetch')) {
+      console.warn('Backend not available, using mock payment intent');
+      return {
+        clientSecret: 'mock_client_secret_' + Date.now(),
+        paymentIntentId: 'pi_mock_' + Date.now(),
+      };
+    }
+    throw new Error(error.message || 'Failed to create payment intent');
   }
 };
 
@@ -60,26 +75,30 @@ export const createPaymentIntent = async (
  */
 export const confirmPaymentIntent = async (
   paymentIntentId: string
-): Promise<{ success: boolean; error?: string }> => {
+): Promise<{ success: boolean }> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/stripe/confirm-payment-intent`, {
+    const response = await fetch(`${API_BASE_URL}/payments/confirm`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      credentials: 'include',
       body: JSON.stringify({ paymentIntentId }),
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Failed to confirm payment' }));
-      throw new Error(error.message || 'Failed to confirm payment');
+      const error = await response.json().catch(() => ({ error: 'Failed to confirm payment' }));
+      throw new Error(error.error || 'Failed to confirm payment');
     }
 
     return await response.json();
-  } catch (error) {
-    console.error('Error confirming payment intent:', error);
-    throw error;
+  } catch (error: any) {
+    console.error('Error confirming payment:', error);
+    // Fallback for development if backend is not available
+    if (import.meta.env.DEV && error.message.includes('fetch')) {
+      console.warn('Backend not available, using mock confirmation');
+      return { success: true };
+    }
+    throw new Error(error.message || 'Failed to confirm payment');
   }
 };
 
@@ -145,7 +164,19 @@ export const createStripeConnectOnboarding = async (
 /**
  * Get Stripe Connect OAuth URL
  */
-export const getStripeConnectOAuthUrl = (hostId: string, returnUrl: string): string => {
+export const getStripeConnectOAuthUrl = async (hostId: string, returnUrl: string): Promise<string> => {
+  try {
+    // Try to get OAuth URL from backend
+    const response = await fetch(`${API_BASE_URL}/stripe-connect/oauth-url?hostId=${hostId}&returnUrl=${encodeURIComponent(returnUrl)}`);
+    if (response.ok) {
+      const data = await response.json();
+      return data.oauthUrl;
+    }
+  } catch (error) {
+    console.warn('Backend OAuth URL not available, using direct method');
+  }
+
+  // Fallback to direct method
   if (!STRIPE_CONNECT_CLIENT_ID) {
     throw new Error('Stripe Connect Client ID is not configured. Please wait for account verification and add VITE_STRIPE_CONNECT_CLIENT_ID to your environment variables.');
   }
@@ -170,22 +201,21 @@ export const handleStripeConnectCallback = async (
   state: string
 ): Promise<StripeConnectAccount> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/stripe/connect/callback`, {
+    const response = await fetch(`${API_BASE_URL}/stripe-connect/callback`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      credentials: 'include',
       body: JSON.stringify({ code, state }),
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Failed to connect Stripe account' }));
-      throw new Error(error.message || 'Failed to connect Stripe account');
+      const error = await response.json().catch(() => ({ error: 'Failed to connect Stripe account' }));
+      throw new Error(error.error || 'Failed to connect Stripe account');
     }
 
     return await response.json();
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error handling Stripe Connect callback:', error);
     throw error;
   }

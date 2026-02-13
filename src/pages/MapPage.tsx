@@ -24,8 +24,8 @@ const MapPage = () => {
       <Navbar />
       <div className="h-[calc(100vh-6rem)] w-full relative">
         <MapContainer
-          center={[37.8044, -122.2712]}
-          zoom={12}
+          center={[38.9072, -77.0369]}
+          zoom={11}
           style={{ height: '100%', width: '100%', zIndex: 0 }}
         >
           <TileLayer

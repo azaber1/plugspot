@@ -18,13 +18,6 @@ const features = [
   { icon: '🌐', title: 'Neighborhood Networks', desc: 'Connect with your community' },
 ];
 
-const stats = [
-  { value: '12,400+', label: 'Chargers' },
-  { value: '89,000+', label: 'Drivers' },
-  { value: '$2.4M', label: 'Host Earnings' },
-  { value: '4.9★', label: 'Rating' },
-];
-
 const steps = [
   {
     number: '1',
@@ -44,6 +37,7 @@ const steps = [
 ];
 
 const LandingPage = () => {
+
   return (
     <div className="min-h-screen bg-gray-900">
       <Navbar />
@@ -86,32 +80,6 @@ const LandingPage = () => {
                 List Your Charger
               </Link>
             </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Stats Bar */}
-      <section className="py-12 px-4">
-        <div className="container mx-auto">
-          <motion.div
-            {...fadeUp}
-            className="glass-card p-8 grid grid-cols-2 md:grid-cols-4 gap-8"
-          >
-            {stats.map((stat, idx) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1, duration: 0.5 }}
-                className="text-center"
-              >
-                <div className="text-3xl md:text-4xl font-heading font-bold text-electric-green mb-2">
-                  {stat.value}
-                </div>
-                <div className="text-gray-400 font-medium">{stat.label}</div>
-              </motion.div>
-            ))}
           </motion.div>
         </div>
       </section>
