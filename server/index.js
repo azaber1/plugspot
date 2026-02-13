@@ -82,8 +82,9 @@ app.post('/api/payments/create-intent', async (req, res) => {
       metadata = {},
     } = req.body;
 
-    if (!amount || amount < 50) {
-      return res.status(400).json({ error: 'Invalid amount' });
+    // Amount is in dollars, minimum is $0.50 (50 cents)
+    if (!amount || typeof amount !== 'number' || amount < 0.50 || isNaN(amount)) {
+      return res.status(400).json({ error: 'Invalid amount. Minimum is $0.50' });
     }
 
     // Create payment intent
