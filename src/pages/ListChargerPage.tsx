@@ -105,8 +105,11 @@ const ListChargerPage = () => {
     };
 
       addCharger(newCharger);
-      showToast('Charger listed successfully!', 'success');
-      navigate('/dashboard');
+      showToast('Charger listed successfully! View it on the Browse page.', 'success');
+      // Navigate to browse page so user can see their newly listed charger
+      setTimeout(() => {
+        navigate('/browse');
+      }, 500);
     } catch (error) {
       showToast('Failed to list charger. Please try again.', 'error');
     } finally {
